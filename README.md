@@ -38,7 +38,7 @@ var syncFn = function (a) {
   return 'running: ' + a;
 };
 
-runAsync(asyncFn, function (answer) {
+runAsync(syncFn, function (answer) {
   console.log(answer); // 'running: sync'
 }, 'sync');
 ```
