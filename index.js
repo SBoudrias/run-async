@@ -20,6 +20,6 @@ module.exports = function (func, cb) {
   }, Array.prototype.slice.call(arguments, 2) );
 
   if (!async) {
-    cb(answer);
+    setImmediate(cb.bind(null, answer));
   }
 };

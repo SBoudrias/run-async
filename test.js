@@ -5,13 +5,16 @@ var runAsync = require('./index');
 
 describe('runAsync', function () {
   it('run synchronous method', function (done) {
+    var ranAsync = false;
     var aFunc = function () {
       return 'pass1';
     };
     runAsync(aFunc, function (val) {
+      assert(ranAsync);
       assert.equal(val, 'pass1');
       done();
     });
+    ranAsync = true;
   });
 
   it('run asynchronous method', function (done) {
