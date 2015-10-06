@@ -44,6 +44,7 @@ module.exports = function (func, cb) {
  * @returns {Function} with identical signature as runAsync, but without the `cb` argument.
  */
 module.exports.promisify = function(Promise) {
+  Promise = Promise || global.Promise;
   return function(func) {
     var args = Array.prototype.slice.call(arguments, 1);
     return new Promise(function (resolve, reject) {

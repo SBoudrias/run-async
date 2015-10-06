@@ -2,8 +2,19 @@
 
 var assert = require('assert');
 var runAsync = require('./index');
-var Promise = require('bluebird');
-var runAsyncPromise = runAsync.promisify(Promise);
+var semver = require('semver');
+var Promise;
+var runAsyncPromise;
+
+if (semver.gte(process.version, '4.0.0')) {
+  console.log('using native promises');
+  Promise = global.Promise;
+  runAsyncPromise = runAsync.promisify();
+} else {
+  console.log('using bluebird promises');
+  Promise = require('bluebird');
+  runAsyncPromise = runAsync.promisify(Promise);
+}
 
 describe('runAsync', function () {
   it('run synchronous method', function (done) {
