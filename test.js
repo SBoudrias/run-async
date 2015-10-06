@@ -22,12 +22,12 @@ describe('runAsync', function () {
     var aFunc = function () {
       return 'pass1';
     };
-    runAsync(aFunc, function (err, val) {
+    runAsync(function (err, val) {
       assert.ifError(err);
       assert(ranAsync);
       assert.equal(val, 'pass1');
       done();
-    });
+    }, aFunc);
     ranAsync = true;
   });
 
@@ -37,11 +37,11 @@ describe('runAsync', function () {
       setImmediate(returns.bind(null, null, 'pass2'));
     };
 
-    runAsync(aFunc, function (err, val) {
+    runAsync(function (err, val) {
       assert.ifError(err);
       assert.equal(val, 'pass2');
       done();
-    });
+    }, aFunc);
   });
 
   it('pass arguments', function (done) {
@@ -50,10 +50,10 @@ describe('runAsync', function () {
       assert.equal(b, 'bar');
       return 'pass1';
     };
-    runAsync(aFunc, function (err, val) {
+    runAsync(function (err, val) {
       assert.ifError(err);
       done();
-    }, 1, 'bar');
+    }, aFunc, 1, 'bar');
   });
 
   it('allow only callback once', function (done) {
@@ -63,10 +63,10 @@ describe('runAsync', function () {
       returns();
     };
 
-    runAsync(aFunc, function (err, val) {
+    runAsync(function (err, val) {
       assert.ifError(err);
       done();
-    });
+    }, aFunc);
   });
 
   it('handles promises', function (done) {
@@ -78,11 +78,11 @@ describe('runAsync', function () {
       });
     };
 
-    runAsync(fn, function (err, val) {
+    runAsync(function (err, val) {
       assert.ifError(err);
       assert.equal('as promised!', val);
       done();
-    });
+    }, fn);
   });
 
   it('throwing synchronously passes error to callback', function (done) {
@@ -90,11 +90,11 @@ describe('runAsync', function () {
       throw new Error('sync error');
     };
 
-    runAsync(throws, function (err, val) {
+    runAsync(function (err, val) {
       assert(err);
       assert.equal(err.message, 'sync error');
       done();
-    });
+    }, throws);
   });
 
   it('rejecting a promise passes error to callback', function (done) {
@@ -106,11 +106,11 @@ describe('runAsync', function () {
       });
     };
 
-    runAsync(rejects, function (err, val) {
+    runAsync(function (err, val) {
       assert(err);
       assert.equal(err.message, 'broken promise');
       done();
-    });
+    }, rejects);
   });
 
   it('can be promisified', function (done) {
