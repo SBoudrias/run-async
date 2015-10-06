@@ -3,6 +3,7 @@
 var assert = require('assert');
 var runAsync = require('./index');
 var Promise = require('bluebird');
+var runAsyncPromise = runAsync.promisify(Promise);
 
 describe('runAsync', function () {
   it('run synchronous method', function (done) {
@@ -97,6 +98,28 @@ describe('runAsync', function () {
     runAsync(rejects, function (err, val) {
       assert(err);
       assert.equal(err.message, 'broken promise');
+      done();
+    });
+  });
+
+  it('can be promisified', function (done) {
+    var sync = function () {
+      return 'sync';
+    };
+
+    runAsyncPromise(sync).then(function (result) {
+      assert.equal(result, 'sync');
+      done();
+    });
+  });
+
+  it('promisified can be rejected', function (done) {
+    var throwsSync = function () {
+      throw new Error('throws sync');
+    };
+
+    runAsyncPromise(throwsSync).catch(function (err) {
+      assert.equal(err.message, 'throws sync');
       done();
     });
   });
