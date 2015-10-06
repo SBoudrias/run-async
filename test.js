@@ -123,4 +123,18 @@ describe('runAsync', function () {
       done();
     });
   });
+
+  it('promisified passes args', function(done) {
+    var checkArgs = function (a, b) {
+      var done = this.async();
+      assert.equal(a, 'a');
+      assert.equal(b, 'b');
+      setImmediate(done.bind(null, null, 'c'));
+    };
+
+    runAsyncPromise(checkArgs, 'a', 'b').then(function (result) {
+      assert.equal(result, 'c');
+      done();
+    });
+  });
 });
