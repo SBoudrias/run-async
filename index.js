@@ -13,7 +13,7 @@ var isPromise = require('is-promise');
 
 module.exports = function (func, cb) {
   var async = false;
-  var cb = once(cb);
+  cb = once(cb);
 
   try {
     var answer = func.apply({

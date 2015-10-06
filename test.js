@@ -59,11 +59,11 @@ describe('runAsync', function () {
 
   it('handles promises', function (done) {
     var fn = function () {
-      return new Promise(function(resolve, reject) {
+      return new Promise(function (resolve, reject) {
         setImmediate(function () {
           resolve('as promised!');
         });
-      })
+      });
     };
 
     runAsync(fn, function (err, val) {
