@@ -21,6 +21,8 @@ module.exports = function (func, cb) {
       promise = new Promise(function (resolve, reject) {
         cb = promiseResolver(resolve, reject, cb);
       });
+    } else if (!cb) {
+      throw new Error('No Native Promise Implementation: You must upgrade to Node >= 0.11.13, or use callbacks.');
     }
 
     try {

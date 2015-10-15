@@ -2,6 +2,7 @@
 
 var hasGlobalPromise = typeof Promise !== 'undefined';
 var ifPromise = hasGlobalPromise ? it : it.skip;
+var notPromise = hasGlobalPromise ? it.skip : it;
 var assert = require('assert');
 var runAsync = require('./index');
 
@@ -124,5 +125,15 @@ describe('runAsync', function () {
       assert.equal(reason.message, 'sync error');
       done();
     });
+  });
+
+  notPromise('throws a helpful error message if no cb, and no global.Promise', function () {
+    var returns = function () {
+      return 'hello';
+    };
+
+    assert.throws(function () {
+      runAsync(returns)();
+    }, /No Native Promise Implementation/);
   });
 });
