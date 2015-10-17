@@ -2,6 +2,7 @@
 
 var once = require('once');
 var isPromise = require('is-promise');
+var promiseResolver = require('promise-resolver');
 
 /**
  * Run a function asynchronously or synchronously
@@ -12,25 +13,37 @@ var isPromise = require('is-promise');
  */
 
 module.exports = function (func, cb) {
-  var async = false;
-  cb = once(cb);
-
-  try {
-    var answer = func.apply({
-      async: function () {
-        async = true;
-        return cb;
-      }
-    }, Array.prototype.slice.call(arguments, 2) );
-
-    if (!async) {
-      if (isPromise(answer)) {
-        answer.then(cb.bind(null, null), cb);
-      } else {
-        setImmediate(cb.bind(null, null, answer));
-      }
+  return function () {
+    var async = false;
+    var promise = null;
+    cb = cb && once(cb);
+    if (typeof Promise !== 'undefined') {
+      promise = new Promise(function (resolve, reject) {
+        cb = promiseResolver(resolve, reject, cb);
+      });
+    } else if (!cb) {
+      throw new Error('No Native Promise Implementation: You must upgrade to Node >= 0.11.13, or use callbacks.');
     }
-  } catch (e) {
-    setImmediate(cb.bind(null, e));
+
+    try {
+      var answer = func.apply({
+        async: function () {
+          async = true;
+          return cb;
+        }
+      }, Array.prototype.slice.call(arguments));
+
+      if (!async) {
+        if (isPromise(answer)) {
+          answer.then(cb.bind(null, null), cb);
+        } else {
+          setImmediate(cb.bind(null, null, answer));
+        }
+      }
+    } catch (e) {
+      setImmediate(cb.bind(null, e));
+    }
+
+    return promise;
   }
 };
