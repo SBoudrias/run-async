@@ -52,7 +52,7 @@ printAfter(function () {
 ```js
 printAfter(function () {
   return 'done running sync function';
-};
+});
 ```
 
 If your version of node support Promises natively (node >= 0.12), `runAsync` will return a promise. Example: `runAsync(func)(arg1, arg2).then(cb)`
