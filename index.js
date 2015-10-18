@@ -5,11 +5,15 @@ var isPromise = require('is-promise');
 var promiseResolver = require('promise-resolver');
 
 /**
- * Run a function asynchronously or synchronously
+ * Return a function that will run a function asynchronously or synchronously
+ *
+ * example:
+ * runAsync(wrappedFunction, callback)(...args);
+ *
  * @param   {Function} func  Function to run
  * @param   {Function} cb    Callback function passed the `func` returned value
- * @...rest {Mixed}    rest  Arguments to pass to `func`
- * @return  {Null}
+ * @return  {Function(arguments)} Arguments to pass to `func`. This function will in turn
+ *                                return a Promise (Node >= 0.12) or call the callbacks.
  */
 
 module.exports = function (func, cb) {
@@ -22,7 +26,7 @@ module.exports = function (func, cb) {
         cb = promiseResolver(resolve, reject, cb);
       });
     } else if (!cb) {
-      throw new Error('No Native Promise Implementation: You must upgrade to Node >= 0.11.13, or use callbacks.');
+      throw new Error('No Native Promise Implementation: You must use a callback function or upgrade to Node >= 0.11.13');
     }
 
     try {
