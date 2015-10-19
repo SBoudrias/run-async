@@ -1,6 +1,5 @@
 'use strict';
 
-var once = require('once');
 var isPromise = require('is-promise');
 var promiseResolver = require('promise-resolver');
 
@@ -19,35 +18,27 @@ var promiseResolver = require('promise-resolver');
 module.exports = function (func, cb) {
   return function () {
     var async = false;
-    var promise = null;
-    cb = cb && once(cb);
-    if (typeof Promise !== 'undefined') {
-      promise = new Promise(function (resolve, reject) {
-        cb = promiseResolver(resolve, reject, cb);
-      });
-    } else if (!cb) {
-      throw new Error('No Native Promise Implementation: You must use a callback function or upgrade to Node >= 0.11.13');
-    }
+    var deferred = promiseResolver.defer(cb);
 
     try {
       var answer = func.apply({
         async: function () {
           async = true;
-          return cb;
+          return deferred.cb;
         }
       }, Array.prototype.slice.call(arguments));
 
       if (!async) {
         if (isPromise(answer)) {
-          answer.then(cb.bind(null, null), cb);
+          answer.then(deferred.resolve, deferred.reject);
         } else {
-          setImmediate(cb.bind(null, null, answer));
+          deferred.cb(null, answer);
         }
       }
     } catch (e) {
-      setImmediate(cb.bind(null, e));
+      deferred.cb(e);
     }
 
-    return promise;
+    return deferred.promise;
   }
 };
