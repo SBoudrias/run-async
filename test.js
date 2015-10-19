@@ -7,7 +7,7 @@ var assert = require('assert');
 var runAsync = require('./index');
 
 describe('runAsync', function () {
-  var Promise = require('bluebird');
+  var Promise = require('pinkie');
 
   it('run synchronous method', function (done) {
     var ranAsync = false;
@@ -134,6 +134,6 @@ describe('runAsync', function () {
 
     assert.throws(function () {
       runAsync(returns)();
-    }, /No Native Promise Implementation/);
+    }, /No Promise Implementation/);
   });
 });
