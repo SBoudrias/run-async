@@ -55,6 +55,26 @@ printAfter(function () {
 });
 ```
 
+#### Calling a callback function
+
+If the wrapped function has a constant number of arguments, it can return its result through a callback function passed in through the last parameter.
+
+```js
+var runAsync = require('run-async');
+
+var sayHelloToJoe = function (func) {
+  var cb = function (err, returnValue) {
+    console.log(returnValue);
+  };
+  runAsync({fixedLength: true}, func, cb)('Joe');
+};
+
+// say hello in English
+sayHelloToJoe(function (name, cb) {
+  cb(null, 'Hello ' + name + '!');
+})
+```
+
 If your version of node support Promises natively (node >= 0.12), `runAsync` will return a promise. Example: `runAsync(func)(arg1, arg2).then(cb)`
 
 Licence

@@ -61,6 +61,20 @@ describe('runAsync', function () {
     })();
   });
 
+  it('handles nodeback', function (done) {
+    var fn = function (cb) {
+      setImmediate(function () {
+        cb(null, 'as promised!');
+      });
+    };
+
+    runAsync({fixedLength: true}, fn, function (err, val) {
+      assert.ifError(err);
+      assert.equal('as promised!', val);
+      done();
+    })();
+  });
+
   it('handles promises', function (done) {
     var fn = function () {
       return new Promise(function (resolve, reject) {
