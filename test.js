@@ -137,3 +137,45 @@ describe('runAsync', function () {
     }, /No Promise Implementation/);
   });
 });
+
+describe('runAsync.cb', function () {
+  it('handles callback parameter', function (done) {
+    var fn = function (cb) {
+      setImmediate(function () {
+        cb(null, 'value');
+      });
+    };
+
+    runAsync.cb(fn, function (err, val) {
+      assert.ifError(err);
+      assert.equal('value', val);
+      done();
+    })();
+  });
+
+  it('run synchronous method', function (done) {
+    var ranAsync = false;
+    var aFunc = function () {
+      return 'pass1';
+    };
+    runAsync.cb(aFunc, function (err, val) {
+      assert.ifError(err);
+      assert(ranAsync);
+      assert.equal(val, 'pass1');
+      done();
+    })();
+    ranAsync = true;
+  });
+
+  ifPromise('handles a returned promise', function (done) {
+    var aFunc = function (a) {
+      return Promise.resolve('foo' + a);
+    };
+
+    runAsync.cb(aFunc, function(err, result) {
+      assert.ifError(err);
+      assert.equal(result, 'foobar');
+      done();
+    })('bar');
+  });
+});
