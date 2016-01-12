@@ -55,6 +55,21 @@ printAfter(function () {
 });
 ```
 
+### runAsync.cb
+
+`runAsync.cb` supports all the function types that `runAsync` does and additionally a traditional **callback as the last argument** signature:
+
+```js
+var runAsync = require('run-async');
+
+// IMPORTANT: The wrapped function must have a fixed number of parameters.
+runAsync.cb(function(a, b, cb) {
+  cb(null, a + b);
+}, function(err, result) {
+  console.log(result)
+})(1, 2)
+```
+
 If your version of node support Promises natively (node >= 0.12), `runAsync` will return a promise. Example: `runAsync(func)(arg1, arg2).then(cb)`
 
 Licence

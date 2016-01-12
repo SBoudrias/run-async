@@ -42,3 +42,13 @@ module.exports = function (func, cb) {
     return deferred.promise;
   }
 };
+
+module.exports.cb = function (func, cb) {
+  return module.exports(function () {
+    var args = Array.prototype.slice.call(arguments);
+    if (args.length === func.length - 1) {
+      args.push(this.async());
+    }
+    return func.apply(this, args);
+  }, cb);
+};
