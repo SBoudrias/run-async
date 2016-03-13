@@ -6,10 +6,7 @@
   "scripts": {
     "test": "mocha -R spec"
   },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/SBoudrias/run-async"
-  },
+  "repository": "SBoudrias/run-async",
   "keywords": [
     "flow",
     "flow-control",
@@ -17,16 +14,11 @@
   ],
   "author": "Simon Boudrias <admin@simonboudrias.com>",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/SBoudrias/run-async/issues"
-  },
-  "homepage": "https://github.com/SBoudrias/run-async",
   "dependencies": {
     "is-promise": "^2.1.0",
-    "promise-resolver": "^3.0.0"
+    "pinkie-promise": "^2.0.0"
   },
   "devDependencies": {
-    "mocha": "^2.3.3",
-    "pinkie": "^1.0.0"
+    "mocha": "^2.3.3"
   }
 }

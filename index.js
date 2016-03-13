@@ -1,7 +1,7 @@
 'use strict';
 
 var isPromise = require('is-promise');
-var promiseResolver = require('promise-resolver');
+var Promise = require('pinkie-promise')
 
 /**
  * Return a function that will run a function asynchronously or synchronously
@@ -15,36 +15,44 @@ var promiseResolver = require('promise-resolver');
  *                                return a Promise (Node >= 0.12) or call the callbacks.
  */
 
-module.exports = function (func, cb) {
+var runAsync = module.exports = function (func, cb) {
+  cb = cb || function () {};
+
   return function () {
     var async = false;
-    var deferred = promiseResolver.defer(cb);
+    var args = arguments;
 
-    try {
+    var promise = new Promise(function (resolve, reject) {
       var answer = func.apply({
         async: function () {
           async = true;
-          return deferred.cb;
+          return function (err, value) {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(value);
+            }
+          };
         }
-      }, Array.prototype.slice.call(arguments));
+      }, Array.prototype.slice.call(args));
 
       if (!async) {
         if (isPromise(answer)) {
-          answer.then(deferred.resolve, deferred.reject);
+          answer.then(resolve, reject);
         } else {
-          deferred.cb(null, answer);
+          resolve(answer);
         }
       }
-    } catch (e) {
-      deferred.cb(e);
-    }
+    });
 
-    return deferred.promise;
+    promise.then(cb.bind(null, null), cb);
+
+    return promise;
   }
 };
 
-module.exports.cb = function (func, cb) {
-  return module.exports(function () {
+runAsync.cb = function (func, cb) {
+  return runAsync(function () {
     var args = Array.prototype.slice.call(arguments);
     if (args.length === func.length - 1) {
       args.push(this.async());

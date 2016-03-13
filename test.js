@@ -1,8 +1,5 @@
 'use strict';
 
-var hasGlobalPromise = typeof Promise !== 'undefined';
-var ifPromise = hasGlobalPromise ? it : it.skip;
-var notPromise = hasGlobalPromise ? it.skip : it;
 var assert = require('assert');
 var runAsync = require('./index');
 
@@ -105,7 +102,7 @@ describe('runAsync', function () {
     })();
   });
 
-  ifPromise('returns a promise that is resolved', function (done) {
+  it('returns a promise that is resolved', function (done) {
     var returns = function () {
       return 'hello';
     };
@@ -116,7 +113,7 @@ describe('runAsync', function () {
     });
   });
 
-  ifPromise('returns a promise that is rejected', function (done) {
+  it('returns a promise that is rejected', function (done) {
     var throws = function () {
       throw new Error('sync error');
     };
@@ -125,16 +122,6 @@ describe('runAsync', function () {
       assert.equal(reason.message, 'sync error');
       done();
     });
-  });
-
-  notPromise('throws a helpful error message if no cb, and no global.Promise', function () {
-    var returns = function () {
-      return 'hello';
-    };
-
-    assert.throws(function () {
-      runAsync(returns)();
-    }, /No Promise Implementation/);
   });
 });
 
@@ -167,7 +154,7 @@ describe('runAsync.cb', function () {
     ranAsync = true;
   });
 
-  ifPromise('handles a returned promise', function (done) {
+  it('handles a returned promise', function (done) {
     var aFunc = function (a) {
       return Promise.resolve('foo' + a);
     };
