@@ -19,6 +19,6 @@
     "pinkie-promise": "^2.0.0"
   },
   "devDependencies": {
-    "mocha": "^2.3.3"
+    "mocha": "^3.1.2"
   }
 }
