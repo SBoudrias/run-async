@@ -12,6 +12,7 @@
     "flow-control",
     "async"
   ],
+  "files": ["index.js"],
   "author": "Simon Boudrias <admin@simonboudrias.com>",
   "license": "MIT",
   "dependencies": {
