@@ -1,6 +1,6 @@
 {
   "name": "run-async",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Utility method to run function either synchronously or asynchronously using the common `this.async()` style.",
   "main": "index.js",
   "scripts": {
