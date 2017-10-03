@@ -24,6 +24,6 @@
     "is-promise": "^2.1.0"
   },
   "devDependencies": {
-    "mocha": "^3.1.2"
+    "mocha": "^4.0.0"
   }
 }
