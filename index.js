@@ -42,9 +42,14 @@ var runAsync = module.exports = function (func, cb) {
 
       var usingCallback = false;
       var callbackConflict = false;
+      var contextEnded = false;
 
       var answer = func.apply({
         async: function () {
+          if (contextEnded) {
+            console.warn('Run-async async() called outside a valid run-async context, callback will be ignored.');
+            return function() {};
+          }
           if (callbackConflict) {
             console.warn('Run-async wrapped function (async) returned a promise.\nCalls to async() callback can have unexpected results.');
           }
@@ -71,6 +76,7 @@ var runAsync = module.exports = function (func, cb) {
           wrappedResolve(answer);
         }
       }
+      contextEnded = true;
     });
 
     promise.then(cb.bind(null, null), cb);

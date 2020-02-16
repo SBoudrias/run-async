@@ -133,6 +133,34 @@ describe('runAsync', function () {
       done();
     })();
   });
+
+  it('ignores async callback outside original function context', function (done) {
+    var outsideContext = false;
+    var outsideContextCallback = async function () {
+      outsideContext = true;
+      this.async()(undefined, 'not as promised!');
+    };
+
+    var fn = async function () {
+      var self = this;
+      setTimeout(function () {
+        outsideContextCallback.call(self);
+      }, 100);
+      return new Promise(function (resolve, reject) {
+        setTimeout(function () {
+          outsideContext = false;
+          resolve('as promised!');
+        }, 500);
+      });
+    };
+
+    runAsync(fn, function (err, val) {
+      assert.equal(false, outsideContext);
+      assert.ifError(err);
+      assert.equal('as promised!', val);
+      done();
+    })();
+  });
 });
 
 describe('runAsync.cb', function () {
