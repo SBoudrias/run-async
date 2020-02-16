@@ -121,6 +121,18 @@ describe('runAsync', function () {
       done();
     });
   });
+
+  it('handles async functions', function (done) {
+    var fn = async function () {
+      return 'as promised!';
+    };
+
+    runAsync(fn, function (err, val) {
+      assert.ifError(err);
+      assert.equal('as promised!', val);
+      done();
+    })();
+  });
 });
 
 describe('runAsync.cb', function () {

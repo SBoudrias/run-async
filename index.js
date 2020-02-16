@@ -18,28 +18,57 @@ var runAsync = module.exports = function (func, cb) {
   cb = cb || function () {};
 
   return function () {
-    var async = false;
+
     var args = arguments;
 
     var promise = new Promise(function (resolve, reject) {
+      var resolved = false;
+      const wrappedResolve = function (value) {
+        if (resolved) {
+          console.warn('Run-async promise already resolved.')
+        }
+        resolved = true;
+        resolve(value);
+      }
+
+      var rejected = false;
+      const wrappedReject = function (value) {
+        if (rejected) {
+          console.warn('Run-async promise already rejected.')
+        }
+        rejected = true;
+        reject(value);
+      }
+
+      var usingCallback = false;
+      var callbackConflict = false;
+
       var answer = func.apply({
         async: function () {
-          async = true;
+          if (callbackConflict) {
+            console.warn('Run-async wrapped function (async) returned a promise.\nCalls to async() callback can have unexpected results.');
+          }
+          usingCallback = true;
           return function (err, value) {
             if (err) {
-              reject(err);
+              wrappedReject(err);
             } else {
-              resolve(value);
+              wrappedResolve(value);
             }
           };
         }
       }, Array.prototype.slice.call(args));
 
-      if (!async) {
+      if (usingCallback) {
         if (isPromise(answer)) {
-          answer.then(resolve, reject);
+          console.warn('Run-async wrapped function (sync) returned a promise but async() callback must be executed to resolve.');
+        }
+      } else {
+        if (isPromise(answer)) {
+          callbackConflict = true;
+          answer.then(wrappedResolve, wrappedReject);
         } else {
-          resolve(answer);
+          wrappedResolve(answer);
         }
       }
     });
