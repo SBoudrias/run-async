@@ -20,9 +20,7 @@
   ],
   "author": "Simon Boudrias <admin@simonboudrias.com>",
   "license": "MIT",
-  "dependencies": {
-    "is-promise": "^2.1.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "mocha": "^7.1.0"
   }
