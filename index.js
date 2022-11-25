@@ -11,17 +11,19 @@ function isPromise(obj) {
  * runAsync(wrappedFunction, callback)(...args);
  *
  * @param   {Function} func  Function to run
- * @param   {Function} cb    Callback function passed the `func` returned value
+ * @param   {Function} [cb]    Callback function passed the `func` returned value
+ * @param   {string} [proxyProperty] `this` property to be used for the callback factory
  * @return  {Function(arguments)} Arguments to pass to `func`. This function will in turn
  *                                return a Promise (Node >= 0.12) or call the callbacks.
  */
 
-var runAsync = module.exports = function (func, cb) {
+var runAsync = module.exports = function (func, cb, proxyProperty) {
   cb = cb || function () {};
 
   return function () {
 
     var args = arguments;
+    var originalThis = this;
 
     var promise = new Promise(function (resolve, reject) {
       var resolved = false;
@@ -46,25 +48,42 @@ var runAsync = module.exports = function (func, cb) {
       var callbackConflict = false;
       var contextEnded = false;
 
-      var answer = func.apply({
-        async: function () {
-          if (contextEnded) {
-            console.warn('Run-async async() called outside a valid run-async context, callback will be ignored.');
-            return function() {};
-          }
-          if (callbackConflict) {
-            console.warn('Run-async wrapped function (async) returned a promise.\nCalls to async() callback can have unexpected results.');
-          }
-          usingCallback = true;
-          return function (err, value) {
-            if (err) {
-              wrappedReject(err);
-            } else {
-              wrappedResolve(value);
-            }
-          };
+      var doneFactory = function () {
+        if (contextEnded) {
+          console.warn('Run-async async() called outside a valid run-async context, callback will be ignored.');
+          return function() {};
         }
-      }, Array.prototype.slice.call(args));
+        if (callbackConflict) {
+          console.warn('Run-async wrapped function (async) returned a promise.\nCalls to async() callback can have unexpected results.');
+        }
+        usingCallback = true;
+        return function (err, value) {
+          if (err) {
+            wrappedReject(err);
+          } else {
+            wrappedResolve(value);
+          }
+        };
+      };
+
+      var _this;
+      if (originalThis && proxyProperty && Proxy) {
+        _this = new Proxy(originalThis, {
+          get(_target, prop) {
+            if (prop === proxyProperty) {
+              return doneFactory;
+            }
+
+            return Reflect.get(...arguments);
+          },
+        });
+      } else if (proxyProperty) {
+        _this = { [proxyProperty]: doneFactory };
+      } else {
+        _this = { async: doneFactory };
+      }
+
+      var answer = func.apply(_this, Array.prototype.slice.call(args));
 
       if (usingCallback) {
         if (isPromise(answer)) {
@@ -95,4 +114,25 @@ runAsync.cb = function (func, cb) {
     }
     return func.apply(this, args);
   }, cb);
+};
+
+/**
+ * Same as `runAsync` with proxy example by default.
+ * Return a function that will run a function asynchronously or synchronously
+ *
+ * example:
+ * runAsync(wrappedFunction, callback)(...args);
+ *
+ * @param   {Function} func  Function to run
+ * @param   {Function} [cb]    Callback function passed the `func` returned value
+ * @param   {string} [proxyProperty] `this` property to be used for the callback factory
+ * @return  {Function(arguments)} Arguments to pass to `func`. This function will in turn
+ *                                return a Promise (Node >= 0.12) or call the callbacks.
+ */
+runAsync.proxy = function (func, cb, proxyProperty = 'async') {
+  if (typeof cb === 'string') {
+    proxyProperty = cb;
+    cb = undefined;
+  }
+  return runAsync(func, cb, proxyProperty);
 };
