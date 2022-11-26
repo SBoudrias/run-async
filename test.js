@@ -173,7 +173,7 @@ describe('runAsync', function () {
     runAsync(fn, 'customAsync')().then(() => done());
   });
 
-  it('handles custom done factory with bound function', function (done) {
+  it('handles bound function', function (done) {
     var fn = function () {
       const cb = this.async();
       if (this.bar === 'bar') {
@@ -186,25 +186,6 @@ describe('runAsync', function () {
     };
 
     runAsync(fn).call({ bar: 'bar' }).then(() => done());
-  });
-
-  it('handles callback parameter', function (done) {
-    var fn = function () {
-      const cb = this.async();
-      if (this.bar === 'bar') {
-        setImmediate(function () {
-          cb(null, 'value');
-        });
-      } else {
-        cb(new Error('not bount'));
-      }
-    };
-
-    runAsync(fn, function (err, val) {
-      assert.ifError(err);
-      assert.equal('value', val);
-      done(err);
-    }).call({ bar: 'bar' });
   });
 });
 
