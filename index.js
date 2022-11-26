@@ -17,7 +17,11 @@ function isPromise(obj) {
  *                                return a Promise (Node >= 0.12) or call the callbacks.
  */
 
-var runAsync = module.exports = function (func, cb, proxyProperty) {
+var runAsync = module.exports = function (func, cb, proxyProperty = 'async') {
+  if (typeof cb === 'string') {
+    proxyProperty = cb;
+    cb = undefined;
+  }
   cb = cb || function () {};
 
   return function () {
@@ -71,16 +75,17 @@ var runAsync = module.exports = function (func, cb, proxyProperty) {
         _this = new Proxy(originalThis, {
           get(_target, prop) {
             if (prop === proxyProperty) {
+              if (prop in _target) {
+                console.warn(`${proxyProperty} property is been shadowed by run-sync`);
+              }
               return doneFactory;
             }
 
             return Reflect.get(...arguments);
           },
         });
-      } else if (proxyProperty) {
-        _this = { [proxyProperty]: doneFactory };
       } else {
-        _this = { async: doneFactory };
+        _this = { [proxyProperty]: doneFactory };
       }
 
       var answer = func.apply(_this, Array.prototype.slice.call(args));
@@ -114,25 +119,4 @@ runAsync.cb = function (func, cb) {
     }
     return func.apply(this, args);
   }, cb);
-};
-
-/**
- * Same as `runAsync` with proxy example by default.
- * Return a function that will run a function asynchronously or synchronously
- *
- * example:
- * runAsync(wrappedFunction, callback)(...args);
- *
- * @param   {Function} func  Function to run
- * @param   {Function} [cb]    Callback function passed the `func` returned value
- * @param   {string} [proxyProperty] `this` property to be used for the callback factory
- * @return  {Function(arguments)} Arguments to pass to `func`. This function will in turn
- *                                return a Promise (Node >= 0.12) or call the callbacks.
- */
-runAsync.proxy = function (func, cb, proxyProperty = 'async') {
-  if (typeof cb === 'string') {
-    proxyProperty = cb;
-    cb = undefined;
-  }
-  return runAsync(func, cb, proxyProperty);
 };

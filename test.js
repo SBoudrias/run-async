@@ -161,6 +161,51 @@ describe('runAsync', function () {
       done();
     })();
   });
+
+  it('handles custom done factory with not bound function', function (done) {
+    var fn = function () {
+      const cb = this.customAsync();
+      setImmediate(function () {
+        cb(null, 'value');
+      });
+    };
+
+    runAsync(fn, 'customAsync')().then(() => done());
+  });
+
+  it('handles custom done factory with bound function', function (done) {
+    var fn = function () {
+      const cb = this.async();
+      if (this.bar === 'bar') {
+        setImmediate(function () {
+          cb(null, 'value');
+        });
+      } else {
+        cb(new Error('not bount'));
+      }
+    };
+
+    runAsync(fn).call({ bar: 'bar' }).then(() => done());
+  });
+
+  it('handles callback parameter', function (done) {
+    var fn = function () {
+      const cb = this.async();
+      if (this.bar === 'bar') {
+        setImmediate(function () {
+          cb(null, 'value');
+        });
+      } else {
+        cb(new Error('not bount'));
+      }
+    };
+
+    runAsync(fn, function (err, val) {
+      assert.ifError(err);
+      assert.equal('value', val);
+      done(err);
+    }).call({ bar: 'bar' });
+  });
 });
 
 describe('runAsync.cb', function () {
@@ -202,52 +247,5 @@ describe('runAsync.cb', function () {
       assert.equal(result, 'foobar');
       done();
     })('bar');
-  });
-});
-
-describe('runAsync.proxy', function () {
-  it('handles custom done factory with not bound function', function (done) {
-    var fn = function () {
-      const cb = this.customAsync();
-      setImmediate(function () {
-        cb(null, 'value');
-      });
-    };
-
-    runAsync.proxy(fn, 'customAsync')().then(() => done());
-  });
-
-  it('handles custom done factory with bound function', function (done) {
-    var fn = function () {
-      const cb = this.async();
-      if (this.bar === 'bar') {
-        setImmediate(function () {
-          cb(null, 'value');
-        });
-      } else {
-        cb(new Error('not bount'));
-      }
-    };
-
-    runAsync.proxy(fn).bind({ bar: 'bar' })().then(() => done());
-  });
-
-  it('handles callback parameter', function (done) {
-    var fn = function () {
-      const cb = this.async();
-      if (this.bar === 'bar') {
-        setImmediate(function () {
-          cb(null, 'value');
-        });
-      } else {
-        cb(new Error('not bount'));
-      }
-    };
-
-    runAsync.proxy(fn, function (err, val) {
-      assert.ifError(err);
-      assert.equal('value', val);
-      done(err);
-    }).bind({ bar: 'bar' })();
   });
 });
