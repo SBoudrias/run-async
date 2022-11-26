@@ -55,6 +55,27 @@ printAfter(function () {
 });
 ```
 
+#### Custom done factory
+```js
+var runAsync = require('run-async');
+
+runAsync(function() {
+  var callback = this.customAsync();
+  callback(null, a + b);
+}, 'customAsync').(1, 2)
+```
+
+#### Passing context to async method
+```js
+var runAsync = require('run-async');
+
+runAsync(function() {
+  assert(this.isBound);
+  var callback = this.async();
+  callback(null, a + b);
+}).call({ isBound: true }, 1, 2)
+```
+
 ### runAsync.cb
 
 `runAsync.cb` supports all the function types that `runAsync` does and additionally a traditional **callback as the last argument** signature:
@@ -68,20 +89,6 @@ runAsync.cb(function(a, b, cb) {
 }, function(err, result) {
   console.log(result)
 })(1, 2)
-```
-
-### runAsync.proxy
-
-`runAsync.proxy` supports all the function types that `runAsync` does and additionally proxies a bound method with a custom done factory:
-
-```js
-var runAsync = require('run-async');
-
-runAsync.proxy(function() {
-  assert(this.isBound);
-  var callback = this.customAsync();
-  callback(null, a + b);
-}, 'customAsync').bind({ isBound: true })(1, 2)
 ```
 
 If your version of node support Promises natively (node >= 0.12), `runAsync` will return a promise. Example: `runAsync(func)(arg1, arg2).then(cb)`
