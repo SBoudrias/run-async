@@ -161,6 +161,32 @@ describe('runAsync', function () {
       done();
     })();
   });
+
+  it('handles custom done factory with not bound function', function (done) {
+    var fn = function () {
+      const cb = this.customAsync();
+      setImmediate(function () {
+        cb(null, 'value');
+      });
+    };
+
+    runAsync(fn, 'customAsync')().then(() => done());
+  });
+
+  it('handles bound function', function (done) {
+    var fn = function () {
+      const cb = this.async();
+      if (this.bar === 'bar') {
+        setImmediate(function () {
+          cb(null, 'value');
+        });
+      } else {
+        cb(new Error('not bount'));
+      }
+    };
+
+    runAsync(fn).call({ bar: 'bar' }).then(() => done());
+  });
 });
 
 describe('runAsync.cb', function () {
