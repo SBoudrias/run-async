@@ -62,7 +62,7 @@ var runAsync = require('run-async');
 runAsync(function() {
   var callback = this.customAsync();
   callback(null, a + b);
-}, 'customAsync').(1, 2)
+}, 'customAsync')(1, 2)
 ```
 
 #### Passing context to async method
