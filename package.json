@@ -20,8 +20,7 @@
   ],
   "author": "Simon Boudrias <admin@simonboudrias.com>",
   "license": "MIT",
-  "dependencies": {},
   "devDependencies": {
-    "mocha": "^7.1.0"
+    "mocha": "^10.2.0"
   }
 }
