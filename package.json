@@ -4,7 +4,8 @@
   "description": "Utility method to run function either synchronously or asynchronously using the common `this.async()` style.",
   "main": "index.js",
   "scripts": {
-    "test": "node --test test.js"
+    "test": "node --test test.js",
+    "lint": "npx oxlint"
   },
   "engines": {
     "node": ">=0.12.0"
@@ -19,5 +20,8 @@
     "index.js"
   ],
   "author": "Simon Boudrias <admin@simonboudrias.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "oxlint": "^1.2.0"
+  }
 }
