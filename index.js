@@ -1,5 +1,9 @@
 function isPromise(obj) {
-  return !!obj && (typeof obj === 'object' || typeof obj === 'function') && typeof obj.then === 'function';
+  return (
+    !!obj &&
+    (typeof obj === "object" || typeof obj === "function") &&
+    typeof obj.then === "function"
+  );
 }
 
 /**
@@ -15,15 +19,14 @@ function isPromise(obj) {
  *                                return a Promise (Node >= 0.12) or call the callbacks.
  */
 
-var runAsync = module.exports = function (func, cb, proxyProperty = 'async') {
-  if (typeof cb === 'string') {
+var runAsync = (module.exports = function (func, cb, proxyProperty = "async") {
+  if (typeof cb === "string") {
     proxyProperty = cb;
     cb = undefined;
   }
   cb = cb || function () {};
 
   return function () {
-
     var args = arguments;
     var originalThis = this;
 
@@ -31,20 +34,20 @@ var runAsync = module.exports = function (func, cb, proxyProperty = 'async') {
       var resolved = false;
       const wrappedResolve = function (value) {
         if (resolved) {
-          console.warn('Run-async promise already resolved.')
+          console.warn("Run-async promise already resolved.");
         }
         resolved = true;
         resolve(value);
-      }
+      };
 
       var rejected = false;
       const wrappedReject = function (value) {
         if (rejected) {
-          console.warn('Run-async promise already rejected.')
+          console.warn("Run-async promise already rejected.");
         }
         rejected = true;
         reject(value);
-      }
+      };
 
       var usingCallback = false;
       var callbackConflict = false;
@@ -52,11 +55,15 @@ var runAsync = module.exports = function (func, cb, proxyProperty = 'async') {
 
       var doneFactory = function () {
         if (contextEnded) {
-          console.warn('Run-async async() called outside a valid run-async context, callback will be ignored.');
-          return function() {};
+          console.warn(
+            "Run-async async() called outside a valid run-async context, callback will be ignored.",
+          );
+          return function () {};
         }
         if (callbackConflict) {
-          console.warn('Run-async wrapped function (async) returned a promise.\nCalls to async() callback can have unexpected results.');
+          console.warn(
+            "Run-async wrapped function (async) returned a promise.\nCalls to async() callback can have unexpected results.",
+          );
         }
         usingCallback = true;
         return function (err, value) {
@@ -74,7 +81,9 @@ var runAsync = module.exports = function (func, cb, proxyProperty = 'async') {
           get(_target, prop) {
             if (prop === proxyProperty) {
               if (prop in _target) {
-                console.warn(`${proxyProperty} property is been shadowed by run-sync`);
+                console.warn(
+                  `${proxyProperty} property is been shadowed by run-sync`,
+                );
               }
               return doneFactory;
             }
@@ -90,7 +99,9 @@ var runAsync = module.exports = function (func, cb, proxyProperty = 'async') {
 
       if (usingCallback) {
         if (isPromise(answer)) {
-          console.warn('Run-async wrapped function (sync) returned a promise but async() callback must be executed to resolve.');
+          console.warn(
+            "Run-async wrapped function (sync) returned a promise but async() callback must be executed to resolve.",
+          );
         }
       } else {
         if (isPromise(answer)) {
@@ -106,8 +117,8 @@ var runAsync = module.exports = function (func, cb, proxyProperty = 'async') {
     promise.then(cb.bind(null, null), cb);
 
     return promise;
-  }
-};
+  };
+});
 
 runAsync.cb = function (func, cb) {
   return runAsync(function () {

@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "test": "node --test test.js",
-    "lint": "npx oxlint"
+    "lint": "npx oxlint && npx prettier --check ."
   },
   "engines": {
     "node": ">=0.12.0"
@@ -27,6 +27,7 @@
   "author": "Simon Boudrias <admin@simonboudrias.com>",
   "license": "MIT",
   "dependencies": {
-    "oxlint": "^1.2.0"
+    "oxlint": "^1.2.0",
+    "prettier": "^3.5.3"
   }
 }
