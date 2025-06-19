@@ -1,152 +1,171 @@
-'use strict';
-var assert = require('assert');
-var runAsync = require('./index');
+const test = require('node:test');
+const assert = require('node:assert');
+const runAsync = require('./index');
 
-describe('runAsync', function () {
-
-  it('run synchronous method', function (done) {
-    var ranAsync = false;
-    var aFunc = function () {
+test('runAsync', async (t) => {
+  await t.test('run synchronous method', async () => {
+    let ranAsync = false;
+    const aFunc = function () {
       return 'pass1';
     };
-    runAsync(aFunc, function (err, val) {
-      assert.ifError(err);
-      assert(ranAsync);
-      assert.equal(val, 'pass1');
-      done();
-    })();
-    ranAsync = true;
+    let called = false;
+    await new Promise(resolve => {
+      runAsync(aFunc, function (err, _val) {
+        assert.ifError(err);
+        assert(ranAsync);
+        assert.equal(_val, 'pass1');
+        called = true;
+        resolve();
+      })();
+      ranAsync = true;
+    });
+    assert(called, 'callback should have been called');
   });
 
-  it('run asynchronous method', function (done) {
-    var aFunc = function () {
-      var returns = this.async();
+  await t.test('run asynchronous method', async () => {
+    const aFunc = function () {
+      const returns = this.async();
       setImmediate(returns.bind(null, null, 'pass2'));
     };
 
-    runAsync(aFunc, function (err, val) {
-      assert.ifError(err);
-      assert.equal(val, 'pass2');
-      done();
-    })();
+    await new Promise(resolve => {
+      runAsync(aFunc, function (err, _val) {
+        assert.ifError(err);
+        assert.equal(_val, 'pass2');
+        resolve();
+      })();
+    });
   });
 
-  it('pass arguments', function (done) {
-    var aFunc = function (a, b) {
+  await t.test('pass arguments', async () => {
+    const aFunc = function (a, b) {
       assert.equal(a, 1);
       assert.equal(b, 'bar');
       return 'pass1';
     };
-    runAsync(aFunc, function (err, val) {
-      assert.ifError(err);
-      done();
-    })(1, 'bar');
+    await new Promise(resolve => {
+      runAsync(aFunc, function (err, _val) {
+        assert.ifError(err);
+        resolve();
+      })(1, 'bar');
+    });
   });
 
-  it('allow only callback once', function (done) {
-    var aFunc = function () {
-      var returns = this.async();
+  await t.test('allow only callback once', async () => {
+    const aFunc = function () {
+      const returns = this.async();
       returns();
       returns();
     };
 
-    runAsync(aFunc, function (err, val) {
-      assert.ifError(err);
-      done();
-    })();
+    await new Promise(resolve => {
+      runAsync(aFunc, function (err, _val) {
+        assert.ifError(err);
+        resolve();
+      })();
+    });
   });
 
-  it('handles promises', function (done) {
-    var fn = function () {
-      return new Promise(function (resolve, reject) {
+  await t.test('handles promises', async () => {
+    const fn = function () {
+      return new Promise(function (resolve, _reject) {
         setImmediate(function () {
           resolve('as promised!');
         });
       });
     };
 
-    runAsync(fn, function (err, val) {
-      assert.ifError(err);
-      assert.equal('as promised!', val);
-      done();
-    })();
+    await new Promise(resolve => {
+      runAsync(fn, function (err, _val) {
+        assert.ifError(err);
+        assert.equal('as promised!', _val);
+        resolve();
+      })();
+    });
   });
 
-  it('throwing synchronously passes error to callback', function (done) {
-    var throws = function () {
+  await t.test('throwing synchronously passes error to callback', async () => {
+    const throws = function () {
       throw new Error('sync error');
     };
 
-    runAsync(throws, function (err, val) {
-      assert(err);
-      assert.equal(err.message, 'sync error');
-      done();
-    })();
+    await new Promise(resolve => {
+      runAsync(throws, function (err, _val) {
+        assert(err);
+        assert.equal(err.message, 'sync error');
+        resolve();
+      })();
+    });
   });
 
-  it('rejecting a promise passes error to callback', function (done) {
-    var rejects = function () {
-      return new Promise(function (resolve, reject) {
+  await t.test('rejecting a promise passes error to callback', async () => {
+    const rejects = function () {
+      return new Promise(function (_resolve, reject) {
         setImmediate(function () {
           reject(new Error('broken promise'));
         });
       });
     };
 
-    runAsync(rejects, function (err, val) {
-      assert(err);
-      assert.equal(err.message, 'broken promise');
-      done();
-    })();
+    await new Promise(resolve => {
+      runAsync(rejects, function (err, _val) {
+        assert(err);
+        assert.equal(err.message, 'broken promise');
+        resolve();
+      })();
+    });
   });
 
-  it('returns a promise that is resolved', function (done) {
-    var returns = function () {
+  await t.test('returns a promise that is resolved', async () => {
+    const returns = function () {
       return 'hello';
     };
 
-    runAsync(returns)().then(function (result) {
+    runAsync(returns)().then(result => {
       assert.equal(result, 'hello');
-      done();
     });
   });
 
-  it('returns a promise that is rejected', function (done) {
-    var throws = function () {
+  await t.test('returns a promise that is rejected', async () => {
+    const throws = function () {
       throw new Error('sync error');
     };
 
-    runAsync(throws)().catch(function (reason) {
+    try {
+      await runAsync(throws)();
+      assert.fail('Expected an error');
+    } catch (reason) {
       assert.equal(reason.message, 'sync error');
-      done();
-    });
+    }
   });
 
-  it('handles async functions', function (done) {
-    var fn = async function () {
+  await t.test('handles async functions', async () => {
+    const fn = async function () {
       return 'as promised!';
     };
 
-    runAsync(fn, function (err, val) {
-      assert.ifError(err);
-      assert.equal('as promised!', val);
-      done();
-    })();
+    await new Promise(resolve => {
+      runAsync(fn, function (err, _val) {
+        assert.ifError(err);
+        assert.equal('as promised!', _val);
+        resolve();
+      })();
+    });
   });
 
-  it('ignores async callback outside original function context', function (done) {
-    var outsideContext = false;
-    var outsideContextCallback = async function () {
+  await t.test('ignores async callback outside original function context', async () => {
+    let outsideContext = false;
+    const outsideContextCallback = async function () {
       outsideContext = true;
       this.async()(undefined, 'not as promised!');
     };
 
-    var fn = async function () {
-      var self = this;
+    const fn = async function () {
+      const self = this;
       setTimeout(function () {
         outsideContextCallback.call(self);
       }, 100);
-      return new Promise(function (resolve, reject) {
+      return new Promise(function (resolve, _reject) {
         setTimeout(function () {
           outsideContext = false;
           resolve('as promised!');
@@ -154,27 +173,29 @@ describe('runAsync', function () {
       });
     };
 
-    runAsync(fn, function (err, val) {
-      assert.equal(false, outsideContext);
-      assert.ifError(err);
-      assert.equal('as promised!', val);
-      done();
-    })();
+    await new Promise(resolve => {
+      runAsync(fn, function (err, _val) {
+        assert.equal(false, outsideContext);
+        assert.ifError(err);
+        assert.equal('as promised!', _val);
+        resolve();
+      })();
+    });
   });
 
-  it('handles custom done factory with not bound function', function (done) {
-    var fn = function () {
+  await t.test('handles custom done factory with not bound function', async () => {
+    const fn = function () {
       const cb = this.customAsync();
       setImmediate(function () {
         cb(null, 'value');
       });
     };
 
-    runAsync(fn, 'customAsync')().then(() => done());
+    await runAsync(fn, 'customAsync')();
   });
 
-  it('handles bound function', function (done) {
-    var fn = function () {
+  await t.test('handles bound function', async () => {
+    const fn = function () {
       const cb = this.async();
       if (this.bar === 'bar') {
         setImmediate(function () {
@@ -185,48 +206,57 @@ describe('runAsync', function () {
       }
     };
 
-    runAsync(fn).call({ bar: 'bar' }).then(() => done());
+    await runAsync(fn).call({ bar: 'bar' });
   });
 });
 
-describe('runAsync.cb', function () {
-  it('handles callback parameter', function (done) {
-    var fn = function (cb) {
+test('runAsync.cb', async (t) => {
+  await t.test('handles callback parameter', async () => {
+    const fn = function (cb) {
       setImmediate(function () {
         cb(null, 'value');
       });
     };
 
-    runAsync.cb(fn, function (err, val) {
-      assert.ifError(err);
-      assert.equal('value', val);
-      done();
-    })();
+    await new Promise(resolve => {
+      runAsync.cb(fn, function (err, _val) {
+        assert.ifError(err);
+        assert.equal('value', _val);
+        resolve();
+      })();
+    });
   });
 
-  it('run synchronous method', function (done) {
-    var ranAsync = false;
-    var aFunc = function () {
+  await t.test('run synchronous method', async () => {
+    let ranAsync = false;
+    const aFunc = function () {
       return 'pass1';
     };
-    runAsync.cb(aFunc, function (err, val) {
-      assert.ifError(err);
-      assert(ranAsync);
-      assert.equal(val, 'pass1');
-      done();
-    })();
-    ranAsync = true;
+    let called = false;
+    await new Promise(resolve => {
+      runAsync.cb(aFunc, function (err, _val) {
+        assert.ifError(err);
+        assert(ranAsync);
+        assert.equal(_val, 'pass1');
+        called = true;
+        resolve();
+      })();
+      ranAsync = true;
+    });
+    assert(called, 'callback should have been called');
   });
 
-  it('handles a returned promise', function (done) {
-    var aFunc = function (a) {
+  await t.test('handles a returned promise', async () => {
+    const aFunc = function (a) {
       return Promise.resolve('foo' + a);
     };
 
-    runAsync.cb(aFunc, function(err, result) {
-      assert.ifError(err);
-      assert.equal(result, 'foobar');
-      done();
-    })('bar');
+    await new Promise(resolve => {
+      runAsync.cb(aFunc, function(err, result) {
+        assert.ifError(err);
+        assert.equal(result, 'foobar');
+        resolve();
+      })('bar');
+    });
   });
 });
