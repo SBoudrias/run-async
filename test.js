@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert');
-const runAsync = require('./index');
+const runAsync = require('.');
 
 test('runAsync', async (t) => {
   await t.test('run synchronous method', async () => {
