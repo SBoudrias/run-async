@@ -1,6 +1,6 @@
 {
   "name": "run-async",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "description": "Utility method to run function either synchronously or asynchronously using the common `this.async()` style.",
   "main": "src/index.js",
   "types": "src/index.d.ts",
