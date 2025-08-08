@@ -1,6 +1,6 @@
 {
   "name": "run-async",
-  "version": "4.0.5",
+  "version": "4.0.6",
   "description": "Utility method to run function either synchronously or asynchronously using the common `this.async()` style.",
   "exports": {
     "./package.json": "./package.json",
